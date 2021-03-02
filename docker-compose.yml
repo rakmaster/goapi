@@ -1,0 +1,33 @@
+version: "3.7"
+services:
+  db:
+    image: "mongo:latest"
+    expose:
+      - "27017"
+    networks:
+      - project
+    volumes:
+      - "mongodb_data:/golang/"
+    env_file: mongo.env
+
+  person-service:
+    container_name: "person-microservice"
+    build:
+      context: .
+      dockerfile: dockerfile
+    restart: always
+    env_file: .env
+    networks:
+      - project
+    expose:
+      - "1234"
+    links:
+      - db
+
+networks:
+  project:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

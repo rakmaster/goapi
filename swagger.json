@@ -1,0 +1,329 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "simple restapi with golang in backend and mongodb as db.",
+    "title": "Golang RestApi With MongoDB",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/person": {
+      "post": {
+        "operationId": "create-person",
+        "summary": "Create Person",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Person Api"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "http request body must be a json format",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Person"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "201 create person is successful",
+            "examples": {
+              "application/json": "{\n \"status\": 201,\n \"message\": \"\",\n \"content\": {\n\t \"_id\": \"5dceb75c625f79894eb82a4f\",\n\t \"username\": \"mohammadkatoozi\",\n\t \"email\": \"k2527806@gmail.com\"\n\t}\n}"
+            },
+            "schema": {
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "content": {
+                  "$ref": "#/definitions/Person"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "406 not acceptable(username or email already exists)",
+            "examples": {
+              "application/json": "{\n \"status\": 406,\n \"message\": \"Error while inserting data.\",\n \"content\": null \n}"
+            },
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "500 server internal error",
+            "examples": {
+              "application/json": "{\n \"status\": 500,\n \"message\": \"Error while inserting data.\",\n \"content\": null \n}"
+            },
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list-person",
+        "summary": "List of Persons",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Person Api"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 list of persons",
+            "examples": {
+              "application/json": "{\n \"status\": 201,\n \"message\": \"\",\n \"content\": \n\t [\n\t\t{\n \t\t\"_id\": \"5dceb75c625f79894eb82a4f\",\n\t\t \"username\": \"mohammadkatoozi\",\n\t\t \"email\": \"k2527806@gmail.com\"\n\t\t},\t\n\t\t{\n \t\t\"_id\": \"5dceb75c625f79894eb82a4f\",\n\t\t \"username\": \"mohammadkatoozi\",\n\t\t \"email\": \"k2527806@gmail.com\"\n\t\t}\n\t]\n}"
+            },
+            "schema": {
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Person"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/person/{id}": {
+      "get": {
+        "operationId": "get-person",
+        "summary": "Get Person",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Person Api"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "person id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "person exists",
+            "examples": {
+              "application/json": "{\n \"status\": 200,\n \"message\": \"\",\n \"content\": {\n\t \"_id\": \"5dceb75c625f79894eb82a4f\",\n\t \"username\": \"mohammadkatoozi\",\n\t \"email\": \"k2527806@gmail.com\"\n\t}\n}"
+            },
+            "schema": {
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "content": {
+                  "$ref": "#/definitions/Person"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update-person",
+        "summary": "Update Person",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Person Api"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "person id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "http request body must be a json format",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Person"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "person updated",
+            "examples": {
+              "application/json": "{\n \"status\": 202,\n \"message\": \"\",\n \"content\": {\n\t \"_id\": \"5dceb75c625f79894eb82a4f\",\n\t \"username\": \"mohammadkatoozi\",\n\t \"email\": \"k2527806@gmail.com\"\n\t}\n}"
+            },
+            "schema": {
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "content": {
+                  "$ref": "#/definitions/Person"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "person not found",
+            "examples": {
+              "application/json": "{\n \"status\": 404,\n \"message\": \"person not found\",\n \"content\": null\n}"
+            },
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-person",
+        "summary": "Update Person",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Person Api"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "person id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "http request body must be a json format",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Person"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "person updated",
+            "examples": {
+              "application/json": "{\n \"status\": 202,\n \"message\": \"\",\n \"content\": {\n\t \"_id\": \"5dceb75c625f79894eb82a4f\",\n\t \"username\": \"mohammadkatoozi\",\n\t \"email\": \"k2527806@gmail.com\"\n\t}\n}"
+            },
+            "schema": {
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "content": {
+                  "$ref": "#/definitions/Person"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "person not found",
+            "examples": {
+              "application/json": "{\n \"status\": 404,\n \"message\": \"person not found\",\n \"content\": null\n}"
+            },
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Person": {
+      "required": [
+        "username",
+        "email"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "Unique identifier representing a specific person.",
+          "example": "5dcd702258d90272b062efba"
+        },
+        "username": {
+          "type": "string",
+          "description": "person username. must be unique",
+          "example": "john_doe"
+        },
+        "email": {
+          "type": "string",
+          "description": "person email. must be unique",
+          "example": "john_doe@gmail.com"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "person first name",
+          "example": "John"
+        },
+        "last_name": {
+          "type": "string",
+          "description": "person last name",
+          "example": "Doe"
+        },
+        "data": {
+          "type": "object",
+          "description": "data is a placeholder for saving more data about person. any data can be passin in with key:value format",
+          "example": {
+            "age": "21"
+          }
+        }
+      }
+    },
+    "Error": {
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "content": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

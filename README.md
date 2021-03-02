@@ -1,2 +1,2 @@
 # goapi
-first go api test
+Simple REST Api with MongoDB and gorilla/mux
