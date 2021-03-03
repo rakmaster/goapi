@@ -2,8 +2,14 @@ version: "3.7"
 services:
   db:
     image: "mongo:latest"
-    expose:
-      - "27017"
+    container_name: "mongodb"
+    hostname: "mongodb"
+    environment:
+      # provide your credentials here
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - 27017:27017
     networks:
       - project
     volumes:
@@ -11,16 +17,15 @@ services:
     env_file: mongo.env
 
   person-service:
-    container_name: "person-microservice"
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     restart: always
     env_file: .env
     networks:
       - project
     expose:
-      - "1234"
+      - "8080"
     links:
       - db
 
