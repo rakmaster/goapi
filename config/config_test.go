@@ -10,7 +10,7 @@ const succeed = "\u2713"
 const failed = "\u2717"
 
 func TestConfig(t *testing.T) {
-	os.Setenv("server_host", "person-microservice:8080")
+	os.Setenv("server_host", "localhost:8080")
 	os.Setenv("mongo_user", "root")
 	os.Setenv("mongo_password", "password")
 	os.Setenv("mongo_host", "mongodb")

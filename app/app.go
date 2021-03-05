@@ -99,7 +99,7 @@ func (app *App) Run(host string) {
 	go func() {
 		log.Fatal(http.ListenAndServe(host, app.Router))
 	}()
-	log.Printf("Server is listning on http://%s\n", host)
+	log.Printf("Server is listening on http://%s\n", host)
 	sig := <-sigs
 	log.Println("Signal: ", sig)
 
