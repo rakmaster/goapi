@@ -17,6 +17,8 @@ services:
     env_file: mongo.env
 
   person-service:
+    container_name: "person-service"
+    hostname: "person-service"
     build:
       context: .
       dockerfile: Dockerfile
@@ -24,8 +26,8 @@ services:
     env_file: .env
     networks:
       - project
-    expose:
-      - "8080"
+    ports:
+      - 8080:8080
     links:
       - db
 

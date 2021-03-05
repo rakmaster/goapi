@@ -42,12 +42,13 @@ func (app *App) Initialize(config *config.Config) {
 
 // SetupRouters will register routes in router
 func (app *App) setRouters() {
-	app.Post("/person", app.handleRequest(handler.CreatePerson))
-	app.Patch("/person/{id}", app.handleRequest(handler.UpdatePerson))
-	app.Put("/person/{id}", app.handleRequest(handler.UpdatePerson))
-	app.Get("/person/{id}", app.handleRequest(handler.GetPerson))
-	app.Get("/person", app.handleRequest(handler.GetPersons))
-	app.Get("/person", app.handleRequest(handler.GetPersons), "page", "{page}")
+	app.Post("/person", app.handleDbRequest(handler.CreatePerson))
+	app.Patch("/person/{id}", app.handleDbRequest(handler.UpdatePerson))
+	app.Put("/person/{id}", app.handleDbRequest(handler.UpdatePerson))
+	app.Get("/person/{id}", app.handleDbRequest(handler.GetPerson))
+	app.Get("/person", app.handleDbRequest(handler.GetPersons))
+	app.Get("/person", app.handleDbRequest(handler.GetPersons), "page", "{page}")
+	app.Get("/", app.handleHtRequest(handler.ShowDefault))
 }
 
 // UseMiddleware will add global middleware in router
@@ -97,7 +98,8 @@ func (app *App) Run(host string) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt, os.Kill)
 	go func() {
-		log.Fatal(http.ListenAndServe(host, app.Router))
+		http.Handle("/", app.Router)
+		log.Fatal(http.ListenAndServe(":8080", app.Router))
 	}()
 	log.Printf("Server is listening on http://%s\n", host)
 	sig := <-sigs
@@ -107,12 +109,21 @@ func (app *App) Run(host string) {
 	app.DB.Client().Disconnect(context.Background())
 }
 
-// RequestHandlerFunction is a custome type that help us to pass db arg to all endpoints
-type RequestHandlerFunction func(db *mongo.Database, w http.ResponseWriter, r *http.Request)
+// RequestDbHandlerFunction is a custome type that help us to pass db arg to all endpoints
+type RequestDbHandlerFunction func(db *mongo.Database, w http.ResponseWriter, r *http.Request)
 
 // handleRequest is a middleware we create for pass in db connection to endpoints.
-func (app *App) handleRequest(handler RequestHandlerFunction) http.HandlerFunc {
+func (app *App) handleDbRequest(handler RequestDbHandlerFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handler(app.DB, w, r)
+	}
+}
+
+// RequestHtHandlerFunction handles a regular http request
+type RequestHtHandlerFunction func(w http.ResponseWriter, r *http.Request)
+
+func (app *App) handleHtRequest(handler RequestHtHandlerFunction) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r)
 	}
 }
