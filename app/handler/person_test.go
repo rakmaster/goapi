@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/rakmaster/goapi/app/controller"
 	"github.com/rakmaster/goapi/app/db"
 	"github.com/rakmaster/goapi/app/model"
 	"github.com/rakmaster/goapi/config"
@@ -36,7 +37,7 @@ func TestCreatePerson(t *testing.T) {
 
 	person, _ := json.Marshal(model.NewPerson("john", "doe", "john_doe", "john@gmail.com", nil))
 
-	httpHandler := http.HandlerFunc(handleRequest(dbConnection, CreatePerson))
+	httpHandler := http.HandlerFunc(handleRequest(dbConnection, controller.CreatePerson))
 
 	// check http created status
 	req, rr := createNewRequestNewRecorder("POST", "/person", bytes.NewBuffer(person))
