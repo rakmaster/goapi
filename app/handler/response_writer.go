@@ -2,15 +2,28 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-
-	"github.com/rakmaster/goapi/app/model"
 )
 
-// ResponseWriter will write result in http.ResponseWriter
-func ResponseWriter(res http.ResponseWriter, statusCode int, message string, data interface{}) error {
+// JSONResponseWriter will write result in http.ResponseWriter
+func JSONResponseWriter(res http.ResponseWriter, statusCode int, data interface{}) error {
 	res.WriteHeader(statusCode)
-	httpResponse := model.NewResponse(statusCode, message, data)
+	httpResponse := NewResponse(data)
 	err := json.NewEncoder(res).Encode(httpResponse)
 	return err
+}
+
+// JAPIErrorResponseWriter writes a standard JSON:API error response
+func JAPIErrorResponseWriter(res http.ResponseWriter, statusCode int, message string) error {
+	res.WriteHeader(statusCode)
+	errorResponse := NewErrorResponse(statusCode, message, message, message)
+	err := json.NewEncoder(res).Encode(errorResponse)
+	return err
+}
+
+// HTMLResponseWriter will write result in http.ResponseWriter
+func HTMLResponseWriter(res http.ResponseWriter, statusCode int, message string) {
+	res.WriteHeader(statusCode)
+	fmt.Fprintf(res, "<html><head><meta charset='UTF-8'></head><body>%v</body></html>", message)
 }

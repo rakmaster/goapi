@@ -36,7 +36,6 @@ func (app *App) Initialize(config *config.Config) {
 	app.createIndexes()
 
 	app.Router = mux.NewRouter()
-	app.UseMiddleware(handler.JSONContentTypeMiddleware)
 	app.setRouters()
 }
 
@@ -49,11 +48,6 @@ func (app *App) setRouters() {
 	app.Get("/person", app.handleDbRequest(handler.GetPersons))
 	app.Get("/person", app.handleDbRequest(handler.GetPersons), "page", "{page}")
 	app.Get("/", app.handleHtRequest(handler.ShowDefault))
-}
-
-// UseMiddleware will add global middleware in router
-func (app *App) UseMiddleware(middleware mux.MiddlewareFunc) {
-	app.Router.Use(middleware)
 }
 
 // createIndexes will create unique and index fields.
@@ -115,6 +109,7 @@ type RequestDbHandlerFunction func(db *mongo.Database, w http.ResponseWriter, r 
 // handleRequest is a middleware we create for pass in db connection to endpoints.
 func (app *App) handleDbRequest(handler RequestDbHandlerFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
 		handler(app.DB, w, r)
 	}
 }
@@ -124,6 +119,7 @@ type RequestHtHandlerFunction func(w http.ResponseWriter, r *http.Request)
 
 func (app *App) handleHtRequest(handler RequestHtHandlerFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		handler(w, r)
 	}
 }

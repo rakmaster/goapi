@@ -24,21 +24,21 @@ func CreatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	person := new(model.Person)
 	err := json.NewDecoder(req.Body).Decode(person)
 	if err != nil {
-		ResponseWriter(res, http.StatusBadRequest, "body json request have issues!!!", nil)
+		JAPIErrorResponseWriter(res, http.StatusBadRequest, "body json request have issues!!!")
 		return
 	}
 	result, err := db.Collection("people").InsertOne(nil, person)
 	if err != nil {
 		switch err.(type) {
 		case mongo.WriteException:
-			ResponseWriter(res, http.StatusNotAcceptable, "username or email already exists in database.", nil)
+			JAPIErrorResponseWriter(res, http.StatusNotAcceptable, "username or email already exists in database.")
 		default:
-			ResponseWriter(res, http.StatusInternalServerError, "Error while inserting data.", nil)
+			JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error while inserting data.")
 		}
 		return
 	}
 	person.ID = result.InsertedID.(primitive.ObjectID)
-	ResponseWriter(res, http.StatusCreated, "", person)
+	JSONResponseWriter(res, http.StatusCreated, person)
 }
 
 // GetPersons will handle people list get request
@@ -60,16 +60,16 @@ func GetPersons(db *mongo.Database, res http.ResponseWriter, req *http.Request) 
 	curser, err := db.Collection("people").Find(nil, bson.M{}, &findOptions)
 	if err != nil {
 		log.Printf("Error while quering collection: %v\n", err)
-		ResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data", nil)
+		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
 		return
 	}
 	err = curser.All(context.Background(), &personList)
 	if err != nil {
 		log.Fatalf("Error in curser: %v", err)
-		ResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data", nil)
+		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
 		return
 	}
-	ResponseWriter(res, http.StatusOK, "", personList)
+	JSONResponseWriter(res, http.StatusOK, personList)
 }
 
 // GetPerson will give us person with special id
@@ -77,7 +77,7 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 	var params = mux.Vars(req)
 	id, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		ResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!", nil)
+		JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
 		return
 	}
 	var person model.Person
@@ -85,14 +85,14 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
-			ResponseWriter(res, http.StatusNotFound, "person not found", nil)
+			JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
 		default:
 			log.Printf("Error while decode to go struct:%v\n", err)
-			ResponseWriter(res, http.StatusInternalServerError, "there is an error on server!!!", nil)
+			HTMLResponseWriter(res, http.StatusInternalServerError, "there is an error on server!!!")
 		}
 		return
 	}
-	ResponseWriter(res, http.StatusOK, "", person)
+	JSONResponseWriter(res, http.StatusOK, person)
 }
 
 // UpdatePerson will handle the person update endpoint
@@ -100,14 +100,14 @@ func UpdatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	var updateData map[string]interface{}
 	err := json.NewDecoder(req.Body).Decode(&updateData)
 	if err != nil {
-		ResponseWriter(res, http.StatusBadRequest, "json body is incorrect", nil)
+		JAPIErrorResponseWriter(res, http.StatusBadRequest, "json body is incorrect")
 		return
 	}
 	// we dont handle the json decode return error because all our fields have the omitempty tag.
 	var params = mux.Vars(req)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		ResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!", nil)
+		JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
 		return
 	}
 	update := bson.M{
@@ -116,12 +116,12 @@ func UpdatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	result, err := db.Collection("people").UpdateOne(context.Background(), model.Person{ID: oid}, update)
 	if err != nil {
 		log.Printf("Error while updateing document: %v", err)
-		ResponseWriter(res, http.StatusInternalServerError, "error in updating document!!!", nil)
+		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "error in updating document!!!")
 		return
 	}
 	if result.MatchedCount == 1 {
-		ResponseWriter(res, http.StatusAccepted, "", &updateData)
+		JSONResponseWriter(res, http.StatusAccepted, &updateData)
 	} else {
-		ResponseWriter(res, http.StatusNotFound, "person not found", nil)
+		JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
 	}
 }
