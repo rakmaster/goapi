@@ -16,9 +16,9 @@ services:
       - "mongodb_data:/golang/"
     env_file: mongo.env
 
-  person-service:
-    container_name: "person-service"
-    hostname: "person-service"
+  api:
+    container_name: "api"
+    hostname: "api"
     build:
       context: .
       dockerfile: Dockerfile
