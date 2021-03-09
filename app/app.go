@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/rakmaster/goapi/app/controller"
 	"github.com/rakmaster/goapi/app/db"
+	"github.com/rakmaster/goapi/app/handler"
 	"github.com/rakmaster/goapi/config"
 
 	"github.com/gorilla/mux"
@@ -41,13 +41,13 @@ func (app *App) Initialize(config *config.Config) {
 
 // SetupRouters will register routes in router
 func (app *App) setRouters() {
-	app.Post("/person", app.handleDbRequest(controller.CreatePerson))
-	app.Patch("/person/{id}", app.handleDbRequest(controller.UpdatePerson))
-	app.Put("/person/{id}", app.handleDbRequest(controller.UpdatePerson))
-	app.Get("/person/{id}", app.handleDbRequest(controller.GetPerson))
-	app.Get("/person", app.handleDbRequest(controller.GetPersons))
-	app.Get("/person", app.handleDbRequest(controller.GetPersons), "page", "{page}")
-	app.Get("/", app.handleHtRequest(controller.ShowDefault))
+	app.Post("/person", app.handleDbRequest(handler.CreatePerson))
+	app.Patch("/person/{id}", app.handleDbRequest(handler.UpdatePerson))
+	app.Put("/person/{id}", app.handleDbRequest(handler.UpdatePerson))
+	app.Get("/person/{id}", app.handleDbRequest(handler.GetPerson))
+	app.Get("/person", app.handleDbRequest(handler.GetPersons))
+	app.Get("/person", app.handleDbRequest(handler.GetPersons), "page", "{page}")
+	app.Get("/", app.handleHtRequest(handler.ShowDefault))
 }
 
 // createIndexes will create unique and index fields.
