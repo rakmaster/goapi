@@ -33,7 +33,7 @@ type (
 )
 
 // NewResponse is the Response struct factory function
-func NewResponse(content interface{}) *Response {
+func NewJAPIResponse(content interface{}) *Response {
 	return &Response{
 		Data: content,
 	}

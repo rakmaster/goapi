@@ -7,9 +7,9 @@ import (
 )
 
 // JSONResponseWriter will write result in http.ResponseWriter
-func JSONResponseWriter(res http.ResponseWriter, statusCode int, data interface{}) error {
+func JAPIResponseWriter(res http.ResponseWriter, statusCode int, data interface{}) error {
 	res.WriteHeader(statusCode)
-	httpResponse := NewResponse(data)
+	httpResponse := NewJAPIResponse(data)
 	err := json.NewEncoder(res).Encode(httpResponse)
 	return err
 }
