@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/rakmaster/goapi/app/handler"
 	"github.com/rakmaster/goapi/app/model"
 
 	"github.com/gorilla/mux"
@@ -24,21 +25,21 @@ func CreatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	person := new(model.Person)
 	err := json.NewDecoder(req.Body).Decode(person)
 	if err != nil {
-		JAPIErrorResponseWriter(res, http.StatusBadRequest, "body json request have issues!!!")
+		handler.JAPIErrorResponseWriter(res, http.StatusBadRequest, "body json request have issues!!!")
 		return
 	}
 	result, err := db.Collection("people").InsertOne(nil, person)
 	if err != nil {
 		switch err.(type) {
 		case mongo.WriteException:
-			JAPIErrorResponseWriter(res, http.StatusNotAcceptable, "username or email already exists in database.")
+			handler.JAPIErrorResponseWriter(res, http.StatusNotAcceptable, "username or email already exists in database.")
 		default:
-			JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error while inserting data.")
+			handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error while inserting data.")
 		}
 		return
 	}
 	person.ID = result.InsertedID.(primitive.ObjectID)
-	JSONResponseWriter(res, http.StatusCreated, person)
+	handler.JSONResponseWriter(res, http.StatusCreated, person)
 }
 
 // GetPersons will handle people list get request
@@ -60,16 +61,16 @@ func GetPersons(db *mongo.Database, res http.ResponseWriter, req *http.Request) 
 	curser, err := db.Collection("people").Find(nil, bson.M{}, &findOptions)
 	if err != nil {
 		log.Printf("Error while quering collection: %v\n", err)
-		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
+		handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
 		return
 	}
 	err = curser.All(context.Background(), &personList)
 	if err != nil {
 		log.Fatalf("Error in curser: %v", err)
-		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
+		handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
 		return
 	}
-	JSONResponseWriter(res, http.StatusOK, personList)
+	handler.JSONResponseWriter(res, http.StatusOK, personList)
 }
 
 // GetPerson will give us person with special id
@@ -77,7 +78,7 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 	var params = mux.Vars(req)
 	id, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
+		handler.JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
 		return
 	}
 	var person model.Person
@@ -85,14 +86,14 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
-			JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
+			handler.JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
 		default:
 			log.Printf("Error while decode to go struct:%v\n", err)
-			HTMLResponseWriter(res, http.StatusInternalServerError, "there is an error on server!!!")
+			handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "there is an error on server!!!")
 		}
 		return
 	}
-	JSONResponseWriter(res, http.StatusOK, person)
+	handler.JSONResponseWriter(res, http.StatusOK, person)
 }
 
 // UpdatePerson will handle the person update endpoint
@@ -100,14 +101,14 @@ func UpdatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	var updateData map[string]interface{}
 	err := json.NewDecoder(req.Body).Decode(&updateData)
 	if err != nil {
-		JAPIErrorResponseWriter(res, http.StatusBadRequest, "json body is incorrect")
+		handler.JAPIErrorResponseWriter(res, http.StatusBadRequest, "json body is incorrect")
 		return
 	}
 	// we dont handle the json decode return error because all our fields have the omitempty tag.
 	var params = mux.Vars(req)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
+		handler.JAPIErrorResponseWriter(res, http.StatusBadRequest, "id that you sent is wrong!!!")
 		return
 	}
 	update := bson.M{
@@ -116,12 +117,12 @@ func UpdatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 	result, err := db.Collection("people").UpdateOne(context.Background(), model.Person{ID: oid}, update)
 	if err != nil {
 		log.Printf("Error while updateing document: %v", err)
-		JAPIErrorResponseWriter(res, http.StatusInternalServerError, "error in updating document!!!")
+		handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "error in updating document!!!")
 		return
 	}
 	if result.MatchedCount == 1 {
-		JSONResponseWriter(res, http.StatusAccepted, &updateData)
+		handler.JSONResponseWriter(res, http.StatusAccepted, &updateData)
 	} else {
-		JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
+		handler.JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
 	}
 }
