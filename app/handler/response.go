@@ -53,12 +53,15 @@ func NewPaginatedResponse(count int, next, prev string, results interface{}) *Re
 
 // NewErrorResponse is the Error Response struct factory function
 func NewErrorResponse(status int, pointer string, title string, detail string) *Ers {
+	e := Error{
+		Status: status,
+		Source: Source{pointer},
+		Title:  title,
+		Detail: detail,
+	}
 	return &Ers{
-		Errors: &Error{
-			Status: status,
-			Source: Source{pointer},
-			Title:  title,
-			Detail: detail,
+		Errors: []Error{
+			e,
 		},
 	}
 }
