@@ -39,7 +39,7 @@ func CreatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 		return
 	}
 	person.ID = result.InsertedID.(primitive.ObjectID)
-	handler.JSONResponseWriter(res, http.StatusCreated, person)
+	handler.JAPIResponseWriter(res, http.StatusCreated, person)
 }
 
 // GetPersons will handle people list get request
@@ -70,7 +70,7 @@ func GetPersons(db *mongo.Database, res http.ResponseWriter, req *http.Request) 
 		handler.JAPIErrorResponseWriter(res, http.StatusInternalServerError, "Error happend while reading data")
 		return
 	}
-	handler.JSONResponseWriter(res, http.StatusOK, personList)
+	handler.JAPIResponseWriter(res, http.StatusOK, personList)
 }
 
 // GetPerson will give us person with special id
@@ -82,7 +82,8 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var person model.Person
-	err = db.Collection("people").FindOne(nil, model.Person{ID: id}).Decode(&person)
+	err = db.Collection("people").FindOne(nil, bson.M{"_id": id}).Decode(&person)
+
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
@@ -93,7 +94,7 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
-	handler.JSONResponseWriter(res, http.StatusOK, person)
+	handler.JAPIResponseWriter(res, http.StatusOK, person)
 }
 
 // UpdatePerson will handle the person update endpoint
@@ -121,7 +122,7 @@ func UpdatePerson(db *mongo.Database, res http.ResponseWriter, req *http.Request
 		return
 	}
 	if result.MatchedCount == 1 {
-		handler.JSONResponseWriter(res, http.StatusAccepted, &updateData)
+		handler.JAPIResponseWriter(res, http.StatusAccepted, &updateData)
 	} else {
 		handler.JAPIErrorResponseWriter(res, http.StatusNotFound, "person not found")
 	}

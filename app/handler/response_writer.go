@@ -2,14 +2,15 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 )
 
 // JSONResponseWriter will write result in http.ResponseWriter
-func JSONResponseWriter(res http.ResponseWriter, statusCode int, data interface{}) error {
+func JAPIResponseWriter(res http.ResponseWriter, statusCode int, data interface{}) error {
 	res.WriteHeader(statusCode)
-	httpResponse := NewResponse(data)
+	httpResponse := NewJAPIResponse(data)
 	err := json.NewEncoder(res).Encode(httpResponse)
 	return err
 }
@@ -22,8 +23,22 @@ func JAPIErrorResponseWriter(res http.ResponseWriter, statusCode int, message st
 	return err
 }
 
+type Html struct {
+	Title   string
+	Message string
+}
+
 // HTMLResponseWriter will write result in http.ResponseWriter
 func HTMLResponseWriter(res http.ResponseWriter, statusCode int, message string) {
 	res.WriteHeader(statusCode)
-	fmt.Fprintf(res, "<html><head><meta charset='UTF-8'></head><body>%v</body></html>", message)
+	r := Html{
+		Title:   "Simple Go JSON:API",
+		Message: message,
+	}
+	parsedTemplate, _ := template.ParseFiles("html/index.html")
+	err := parsedTemplate.Execute(res, r)
+	if err != nil {
+		log.Println("Error executing template :", err)
+		return
+	}
 }
