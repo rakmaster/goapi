@@ -82,7 +82,7 @@ func GetPerson(db *mongo.Database, res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var person model.Person
-	err = db.Collection("people").FindOne(nil, model.Person{ID: id}).Decode(&person)
+	err = db.Collection("people").FindOne(nil, bson.M{"_id": id}).Decode(&person)
 
 	if err != nil {
 		switch err {
